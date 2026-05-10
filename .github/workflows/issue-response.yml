@@ -1,0 +1,27 @@
+name: Issue Auto Response
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+
+jobs:
+  respond:
+    runs-on: [self-hosted, linux, arm64]
+    steps:
+      - name: Process Issue
+        run: |
+          echo "Processing issue: ${{ github.event.issue.title }}"
+          echo "Issue number: ${{ github.event.issue.number }}"
+
+      - name: Process Comment
+        if: github.event_name == 'issue_comment'
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          echo "Comment received: $COMMENT"
+
+      - name: Auto Label
+        run: |
+          LABELS="${{ join(github.event.issue.labels.*.name, ',') }}"
+          echo "Applying labels: $LABELS"
