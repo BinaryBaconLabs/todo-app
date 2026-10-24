@@ -1,10 +1,35 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT') return; // Ignore if the focus is on an input field
+
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return; // Ignore if any modifier key is pressed
+
+      if (e.key === 'n') {
+        e.preventDefault();
+        inputRef.current.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setInput('');
+    }
+  };
 
   const addTodo = (e) => {
     e.preventDefault();
@@ -39,6 +64,7 @@ function App() {
         <input
           ref={inputRef}
           type="text"
+          onKeyDown={handleInputKeyDown}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Add a new task..."
@@ -47,8 +73,21 @@ function App() {
         <button type="submit" className="add-btn" disabled={!input.trim()}>Add</button>
       </form>
       <ul className="todo-list">
-        {todos.map(todo => (
-          <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+        {todos.map((todo) => (
+          <li
+            key={todo.id}
+            className={`todo-item ${todo.completed ? 'completed' : ''}`}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return; // Ignore if the focus is on delete-btn
+
+              if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return; // Ignore if any modifier key is pressed
+
+              if (e.key === 'x') {
+                toggleTodo(todo.id);
+              }
+            }}
+          >
             <span onClick={() => toggleTodo(todo.id)}>{todo.text}</span>
             <button
               onClick={() => deleteTodo(todo.id)}
