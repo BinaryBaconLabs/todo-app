@@ -1,16 +1,52 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './App.css';
 
+const STORAGE_KEY = 'todos';
+
 function App() {
-  const [todos, setTodos] = useState([]);
+  // Load saved todos when the app starts.
+  const [todos, setTodos] = useState(() => {
+    try {
+      const storedTodos = window.localStorage.getItem(STORAGE_KEY);
+      if (!storedTodos) return [];
+
+      const parsedTodos = JSON.parse(storedTodos);
+
+      const validTodos =
+        Array.isArray(parsedTodos) &&
+        parsedTodos.every(
+          (todo) =>
+            todo !== null &&
+            typeof todo === 'object' &&
+            typeof todo.id === 'number' &&
+            typeof todo.text === 'string' &&
+            typeof todo.completed === 'boolean'
+        );
+
+      return validTodos ? parsedTodos : [];
+    } catch {
+      // Missing access or corrupt JSON should not crash the app.
+      return [];
+    }
+  });
+
   const [input, setInput] = useState('');
   const inputRef = useRef(null);
 
+  // Save todos whenever the list changes.
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    } catch {
+      // Keep the app usable if storage is blocked or full.
+    }
+  }, [todos]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT') return; // Ignore if the focus is on an input field
+      if (e.target.tagName === 'INPUT') return;
 
-      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return; // Ignore if any modifier key is pressed
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
 
       if (e.key === 'n') {
         e.preventDefault();
@@ -33,8 +69,17 @@ function App() {
 
   const addTodo = (e) => {
     e.preventDefault();
+
     if (input.trim()) {
-      setTodos([...todos, { id: Date.now(), text: input.trim(), completed: false }]);
+      setTodos([
+        ...todos,
+        {
+          id: Date.now(),
+          text: input.trim(),
+          completed: false
+        }
+      ]);
+
       setInput('');
       inputRef.current.focus();
     }
@@ -42,7 +87,9 @@ function App() {
 
   const toggleTodo = (id) => {
     setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      todo.id === id
+        ? { ...todo, completed: !todo.completed }
+        : todo
     ));
   };
 
@@ -60,6 +107,7 @@ function App() {
   return (
     <div className="app">
       <h1>Todo App</h1>
+
       <form onSubmit={addTodo} className="todo-form">
         <input
           ref={inputRef}
@@ -70,8 +118,16 @@ function App() {
           placeholder="Add a new task..."
           className="todo-input"
         />
-        <button type="submit" className="add-btn" disabled={!input.trim()}>Add</button>
+
+        <button
+          type="submit"
+          className="add-btn"
+          disabled={!input.trim()}
+        >
+          Add
+        </button>
       </form>
+
       <ul className="todo-list">
         {todos.map((todo) => (
           <li
@@ -79,40 +135,52 @@ function App() {
             className={`todo-item ${todo.completed ? 'completed' : ''}`}
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.target !== e.currentTarget) return; // Ignore if the focus is on delete-btn
+              if (e.target !== e.currentTarget) return;
 
-              if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return; // Ignore if any modifier key is pressed
+              if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
 
               if (e.key === 'x') {
                 toggleTodo(todo.id);
               }
             }}
           >
-            <span onClick={() => toggleTodo(todo.id)}>{todo.text}</span>
+            <span onClick={() => toggleTodo(todo.id)}>
+              {todo.text}
+            </span>
+
             <button
               onClick={() => deleteTodo(todo.id)}
               className="delete-btn"
               aria-label={`Delete ${todo.text}`}
-            >×</button>
+            >
+              ×
+            </button>
           </li>
         ))}
       </ul>
+
       {todos.length > 0 && (
         <div className="todo-footer">
           <p className="remaining">
             {remaining} of {todos.length} remaining
           </p>
+
           {completed > 0 && (
             <button
               type="button"
               onClick={clearCompleted}
               className="clear-btn"
-            >Clear completed</button>
+            >
+              Clear completed
+            </button>
           )}
         </div>
       )}
+
       {todos.length === 0 && (
-        <p className="empty" role="status">No tasks yet. Add one above!</p>
+        <p className="empty" role="status">
+          No tasks yet. Add one above!
+        </p>
       )}
     </div>
   );
