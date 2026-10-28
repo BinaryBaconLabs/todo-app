@@ -47,6 +47,8 @@ function App() {
   const [input, setInput] = useState('');
   const [theme, setTheme] = useState(getInitialTheme);
   const [filter, setFilter] = useState('all');
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState('');
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -116,6 +118,27 @@ function App() {
 
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id !== id));
+  };
+
+  const startEditing = (todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  };
+
+  const handleEditKeyDown = (e, id) => {
+    if (e.key === 'Escape') {
+      setEditingId(null);
+    } else if (e.key === 'Enter') {
+      const text = editText.trim();
+      if (text) {
+        setTodos(todos.map(todo =>
+          todo.id === id ? { ...todo, text } : todo
+        ));
+      } else {
+        deleteTodo(id);
+      }
+      setEditingId(null);
+    }
   };
 
   const clearCompleted = () => {
@@ -200,9 +223,24 @@ function App() {
               }
             }}
           >
-            <span onClick={() => toggleTodo(todo.id)}>
-              {todo.text}
-            </span>
+            {editingId === todo.id ? (
+              <input
+                type="text"
+                className="todo-edit-input"
+                aria-label="Edit task"
+                value={editText}
+                autoFocus
+                onChange={(e) => setEditText(e.target.value)}
+                onKeyDown={(e) => handleEditKeyDown(e, todo.id)}
+              />
+            ) : (
+              <span
+                onClick={() => toggleTodo(todo.id)}
+                onDoubleClick={() => startEditing(todo)}
+              >
+                {todo.text}
+              </span>
+            )}
 
             <button
               type="button"

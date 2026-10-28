@@ -1,6 +1,26 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
+test('edits a todo on double-click: Enter saves, Escape cancels', () => {
+  render(<App />);
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+  fireEvent.change(input, { target: { value: 'buy mlk' } });
+  fireEvent.submit(input.closest('form'));
+
+  fireEvent.doubleClick(screen.getByText('buy mlk'));
+  const editInput = screen.getByRole('textbox', { name: /edit task/i });
+  fireEvent.change(editInput, { target: { value: 'buy milk' } });
+  fireEvent.keyDown(editInput, { key: 'Enter' });
+  expect(screen.getByText('buy milk')).toBeInTheDocument();
+
+  fireEvent.doubleClick(screen.getByText('buy milk'));
+  const cancelInput = screen.getByRole('textbox', { name: /edit task/i });
+  fireEvent.change(cancelInput, { target: { value: 'discard me' } });
+  fireEvent.keyDown(cancelInput, { key: 'Escape' });
+  expect(screen.getByText('buy milk')).toBeInTheDocument();
+  expect(screen.queryByText('discard me')).not.toBeInTheDocument();
+});
+
 test('trims whitespace around a new todo', () => {
   render(<App />);
   const input = screen.getByPlaceholderText(/Add a new task/i);

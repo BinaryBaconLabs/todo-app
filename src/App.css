@@ -178,6 +178,17 @@ button:focus-visible {
   color: var(--completed-text);
 }
 
+.todo-edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
 .delete-btn {
   flex-shrink: 0;
   background: #dc3545;
