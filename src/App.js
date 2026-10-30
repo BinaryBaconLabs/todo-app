@@ -1,22 +1,22 @@
-import React, { useRef, useState, useEffect } from 'react';
-import './App.css';
+import React, { useRef, useState, useEffect } from "react";
+import "./App.css";
 
-const STORAGE_KEY = 'todos';
-const THEME_STORAGE_KEY = 'todo-app-theme';
+const STORAGE_KEY = "todos";
+const THEME_STORAGE_KEY = "todo-app-theme";
 
 function getInitialTheme() {
   try {
     const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme === 'light' || savedTheme === 'dark') {
+    if (savedTheme === "light" || savedTheme === "dark") {
       return savedTheme;
     }
   } catch {
     // Fall back to the system preference when storage is unavailable.
   }
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 function App() {
@@ -32,10 +32,10 @@ function App() {
         parsedTodos.every(
           (todo) =>
             todo !== null &&
-            typeof todo === 'object' &&
-            typeof todo.id === 'number' &&
-            typeof todo.text === 'string' &&
-            typeof todo.completed === 'boolean'
+            typeof todo === "object" &&
+            typeof todo.id === "number" &&
+            typeof todo.text === "string" &&
+            typeof todo.completed === "boolean",
         );
 
       return validTodos ? parsedTodos : [];
@@ -44,11 +44,11 @@ function App() {
     }
   });
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [theme, setTheme] = useState(getInitialTheme);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState('');
+  const [editText, setEditText] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -71,22 +71,22 @@ function App() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === "INPUT") return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
 
-      if (e.key === 'n') {
+      if (e.key === "n") {
         e.preventDefault();
         inputRef.current.focus();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const handleInputKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      setInput('');
+    if (e.key === "Escape") {
+      setInput("");
     }
   };
 
@@ -99,29 +99,29 @@ function App() {
         {
           id: Date.now(),
           text: input.trim(),
-          completed: false
-        }
+          completed: false,
+        },
       ]);
 
-      setInput('');
+      setInput("");
       inputRef.current.focus();
     }
   };
 
   const toggleTodo = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id
-        ? { ...todo, completed: !todo.completed }
-        : todo
-    ));
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      ),
+    );
   };
 
   const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
   const moveTodo = (id, direction) => {
     setTodos((currentTodos) => {
-      const currentIndex = currentTodos.findIndex(todo => todo.id === id);
+      const currentIndex = currentTodos.findIndex((todo) => todo.id === id);
       const targetIndex = currentIndex + direction;
 
       if (
@@ -148,14 +148,14 @@ function App() {
   };
 
   const handleEditKeyDown = (e, id) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       setEditingId(null);
-    } else if (e.key === 'Enter') {
+    } else if (e.key === "Enter") {
       const text = editText.trim();
       if (text) {
-        setTodos(todos.map(todo =>
-          todo.id === id ? { ...todo, text } : todo
-        ));
+        setTodos(
+          todos.map((todo) => (todo.id === id ? { ...todo, text } : todo)),
+        );
       } else {
         deleteTodo(id);
       }
@@ -164,19 +164,17 @@ function App() {
   };
 
   const clearCompleted = () => {
-    setTodos(todos.filter(todo => !todo.completed));
+    setTodos(todos.filter((todo) => !todo.completed));
   };
 
-  const remaining = todos.filter(todo => !todo.completed).length;
+  const remaining = todos.filter((todo) => !todo.completed).length;
   const completed = todos.length - remaining;
   useEffect(() => {
-    document.title = remaining > 0
-        ? `(${remaining}) todo-app`
-        : 'todo-app';
-        }, [remaining]);
+    document.title = remaining > 0 ? `(${remaining}) todo-app` : "todo-app";
+  }, [remaining]);
   const filteredTodos = todos.filter((todo) => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
+    if (filter === "active") return !todo.completed;
+    if (filter === "completed") return todo.completed;
     return true;
   });
 
@@ -187,12 +185,16 @@ function App() {
         <button
           type="button"
           className="theme-toggle"
-          onClick={() => setTheme(currentTheme => currentTheme === 'dark' ? 'light' : 'dark')}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          onClick={() =>
+            setTheme((currentTheme) =>
+              currentTheme === "dark" ? "light" : "dark",
+            )
+          }
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
         >
-          <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
-          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
         </button>
       </header>
 
@@ -208,25 +210,21 @@ function App() {
           aria-label="New task"
         />
 
-        <button
-          type="submit"
-          className="add-btn"
-          disabled={!input.trim()}
-        >
+        <button type="submit" className="add-btn" disabled={!input.trim()}>
           Add
         </button>
       </form>
 
       <div className="todo-filters" role="group" aria-label="Filter todos">
         {[
-          { value: 'all', label: 'All' },
-          { value: 'active', label: 'Active' },
-          { value: 'completed', label: 'Completed' }
+          { value: "all", label: "All" },
+          { value: "active", label: "Active" },
+          { value: "completed", label: "Completed" },
         ].map((option) => (
           <button
             key={option.value}
             type="button"
-            className={`filter-btn ${filter === option.value ? 'active' : ''}`}
+            className={`filter-btn ${filter === option.value ? "active" : ""}`}
             aria-pressed={filter === option.value}
             onClick={() => setFilter(option.value)}
           >
@@ -239,18 +237,18 @@ function App() {
         {filteredTodos.map((todo) => (
           <li
             key={todo.id}
-            className={`todo-item ${todo.completed ? 'completed' : ''}`}
+            className={`todo-item ${todo.completed ? "completed" : ""}`}
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.target !== e.currentTarget) return;
               if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
 
-              if (e.key === 'x') {
+              if (e.key === "x") {
                 toggleTodo(todo.id);
-              } else if (e.key === 'j') {
+              } else if (e.key === "j") {
                 e.preventDefault();
                 moveTodo(todo.id, 1);
-              } else if (e.key === 'k') {
+              } else if (e.key === "k") {
                 e.preventDefault();
                 moveTodo(todo.id, -1);
               }
@@ -279,7 +277,7 @@ function App() {
               className="move-btn"
               onClick={() => moveTodo(todo.id, -1)}
               aria-label={`Move ${todo.text} up`}
-              disabled={todos.findIndex(item => item.id === todo.id) === 0}
+              disabled={todos.findIndex((item) => item.id === todo.id) === 0}
             >
               <svg
                 width="16"
@@ -302,7 +300,8 @@ function App() {
               onClick={() => moveTodo(todo.id, 1)}
               aria-label={`Move ${todo.text} down`}
               disabled={
-                todos.findIndex(item => item.id === todo.id) === todos.length - 1
+                todos.findIndex((item) => item.id === todo.id) ===
+                todos.length - 1
               }
             >
               <svg
@@ -333,7 +332,7 @@ function App() {
 
       {todos.length > 0 && filteredTodos.length === 0 && (
         <p className="empty" role="status">
-          {filter === 'active' ? 'No active tasks.' : 'No completed tasks.'}
+          {filter === "active" ? "No active tasks." : "No completed tasks."}
         </p>
       )}
 
