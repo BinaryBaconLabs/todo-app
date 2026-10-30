@@ -189,6 +189,35 @@ button:focus-visible {
   border-radius: 4px;
 }
 
+.move-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-text);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.move-btn:hover:not(:disabled) {
+  background: var(--page-background);
+  color: #007bff;
+}
+
+.move-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .delete-btn {
   flex-shrink: 0;
   background: #dc3545;
@@ -268,6 +297,7 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   body,
   .app {
     transition: none;

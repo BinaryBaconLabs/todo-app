@@ -148,3 +148,105 @@ test('shows only completed todos when the Completed filter is selected', () => {
   expect(screen.getByText('completed task')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Completed' })).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('moves the first todo down', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Move Task A down' }));
+
+  const items = screen.getAllByRole('listitem');
+  expect(items.map(item =>
+    item.querySelector('span')?.textContent
+  )).toEqual(['Task B', 'Task A', 'Task C']);
+});
+
+test('moves the last todo up', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Move Task C up' }));
+
+  const items = screen.getAllByRole('listitem');
+  expect(items.map(item =>
+    item.querySelector('span')?.textContent
+  )).toEqual(['Task A', 'Task C', 'Task B']);
+});
+
+test('moves a focused todo up with j', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  const taskB = screen.getByText('Task B').closest('li');
+  taskB.focus();
+  fireEvent.keyDown(taskB, { key: 'j' });
+
+  const items = screen.getAllByRole('listitem');
+  expect(items.map(item =>
+    item.querySelector('span')?.textContent
+  )).toEqual(['Task B', 'Task A', 'Task C']);
+});
+
+test('moves a focused todo down with k', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  const taskB = screen.getByText('Task B').closest('li');
+  taskB.focus();
+  fireEvent.keyDown(taskB, { key: 'k' });
+
+  const items = screen.getAllByRole('listitem');
+  expect(items.map(item =>
+    item.querySelector('span')?.textContent
+  )).toEqual(['Task A', 'Task C', 'Task B']);
+});
+
+test('persists the reordered todos in localStorage', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Move Task A down' }));
+
+  const savedTodos = JSON.parse(window.localStorage.getItem('todos'));
+
+  expect(savedTodos.map(todo => todo.text)).toEqual([
+    'Task B',
+    'Task A',
+    'Task C',
+  ]);
+});

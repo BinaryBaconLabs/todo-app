@@ -119,6 +119,28 @@ function App() {
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
+  const moveTodo = (id, direction) => {
+    setTodos((currentTodos) => {
+      const currentIndex = currentTodos.findIndex(todo => todo.id === id);
+      const targetIndex = currentIndex + direction;
+
+      if (
+        currentIndex === -1 ||
+        targetIndex < 0 ||
+        targetIndex >= currentTodos.length
+      ) {
+        return currentTodos;
+      }
+
+      const reorderedTodos = [...currentTodos];
+      [reorderedTodos[currentIndex], reorderedTodos[targetIndex]] = [
+        reorderedTodos[targetIndex],
+        reorderedTodos[currentIndex],
+      ];
+
+      return reorderedTodos;
+    });
+  };
 
   const startEditing = (todo) => {
     setEditingId(todo.id);
@@ -220,6 +242,12 @@ function App() {
 
               if (e.key === 'x') {
                 toggleTodo(todo.id);
+              } else if (e.key === 'j') {
+                e.preventDefault();
+                moveTodo(todo.id, -1);
+              } else if (e.key === 'k') {
+                e.preventDefault();
+                moveTodo(todo.id, 1);
               }
             }}
           >
@@ -241,7 +269,51 @@ function App() {
                 {todo.text}
               </span>
             )}
+            <button
+              type="button"
+              className="move-btn"
+              onClick={() => moveTodo(todo.id, -1)}
+              aria-label={`Move ${todo.text} up`}
+              disabled={todos.findIndex(item => item.id === todo.id) === 0}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m18 15-6-6-6 6" />
+              </svg>
+            </button>
 
+            <button
+              type="button"
+              className="move-btn"
+              onClick={() => moveTodo(todo.id, 1)}
+              aria-label={`Move ${todo.text} down`}
+              disabled={
+                todos.findIndex(item => item.id === todo.id) === todos.length - 1
+              }
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={() => deleteTodo(todo.id)}
