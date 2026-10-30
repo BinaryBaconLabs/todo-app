@@ -187,7 +187,7 @@ test('moves the last todo up', () => {
   )).toEqual(['Task A', 'Task C', 'Task B']);
 });
 
-test('moves a focused todo up with j', () => {
+test('moves a focused todo down with j', () => {
   window.localStorage.clear();
   render(<App />);
 
@@ -205,10 +205,10 @@ test('moves a focused todo up with j', () => {
   const items = screen.getAllByRole('listitem');
   expect(items.map(item =>
     item.querySelector('span')?.textContent
-  )).toEqual(['Task B', 'Task A', 'Task C']);
+  )).toEqual(['Task A', 'Task C', 'Task B']);
 });
 
-test('moves a focused todo down with k', () => {
+test('moves a focused todo up with k', () => {
   window.localStorage.clear();
   render(<App />);
 
@@ -226,7 +226,7 @@ test('moves a focused todo down with k', () => {
   const items = screen.getAllByRole('listitem');
   expect(items.map(item =>
     item.querySelector('span')?.textContent
-  )).toEqual(['Task A', 'Task C', 'Task B']);
+  )).toEqual(['Task B', 'Task A', 'Task C']);
 });
 
 test('persists the reordered todos in localStorage', () => {

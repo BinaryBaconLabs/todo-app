@@ -244,10 +244,10 @@ function App() {
                 toggleTodo(todo.id);
               } else if (e.key === 'j') {
                 e.preventDefault();
-                moveTodo(todo.id, -1);
+                moveTodo(todo.id, 1);
               } else if (e.key === 'k') {
                 e.preventDefault();
-                moveTodo(todo.id, 1);
+                moveTodo(todo.id, -1);
               }
             }}
           >
