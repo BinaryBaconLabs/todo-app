@@ -169,6 +169,11 @@ function App() {
 
   const remaining = todos.filter(todo => !todo.completed).length;
   const completed = todos.length - remaining;
+  useEffect(() => {
+    document.title = remaining > 0
+        ? `(${remaining}) todo-app`
+        : 'todo-app';
+        }, [remaining]);
   const filteredTodos = todos.filter((todo) => {
     if (filter === 'active') return !todo.completed;
     if (filter === 'completed') return todo.completed;

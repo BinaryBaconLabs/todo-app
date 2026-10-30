@@ -208,6 +208,25 @@ test('moves a focused todo down with j', () => {
   )).toEqual(['Task A', 'Task C', 'Task B']);
 });
 
+test('updates browser title when remaining todos change', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  fireEvent.change(input, { target: { value: 'Task A' } });
+  fireEvent.submit(input.closest('form'));
+
+  fireEvent.change(input, { target: { value: 'Task B' } });
+  fireEvent.submit(input.closest('form'));
+
+  expect(document.title).toBe('(2) todo-app');
+
+  fireEvent.click(screen.getByText('Task A'));
+
+  expect(document.title).toBe('(1) todo-app');
+});
+
 test('moves a focused todo up with k', () => {
   window.localStorage.clear();
   render(<App />);
