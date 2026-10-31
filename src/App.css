@@ -248,9 +248,17 @@ button:focus-visible {
   margin-top: 12px;
 }
 
+.todo-footer-summary,
+.todo-data-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .remaining {
   color: var(--muted-text);
   font-size: 14px;
+  margin: 0;
 }
 
 .clear-btn {
@@ -264,6 +272,26 @@ button:focus-visible {
 
 .clear-btn:hover {
   text-decoration: underline;
+}
+
+.todo-data-btn {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.todo-data-btn:hover {
+  background: var(--page-background);
+}
+
+.import-status {
+  margin: 8px 0 0;
+  color: var(--muted-text);
+  font-size: 14px;
 }
 
 @media (max-width: 480px) {
@@ -289,6 +317,11 @@ button:focus-visible {
 
   .todo-form {
     gap: 6px;
+  }
+
+  .todo-footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .add-btn {
