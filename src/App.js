@@ -4,6 +4,38 @@ import "./App.css";
 const STORAGE_KEY = "todos";
 const THEME_STORAGE_KEY = "todo-app-theme";
 
+function isTodoArray(value) {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (todo) =>
+        todo !== null &&
+        typeof todo === "object" &&
+        Number.isFinite(todo.id) &&
+        typeof todo.text === "string" &&
+        typeof todo.completed === "boolean",
+    )
+  );
+}
+
+function makeImportedTodos(importedTodos, existingTodos) {
+  const usedIds = new Set(existingTodos.map((todo) => todo.id));
+
+  return importedTodos.map((todo) => {
+    let id = todo.id;
+
+    if (usedIds.has(id)) {
+      id = Date.now();
+      while (usedIds.has(id)) {
+        id += 1;
+      }
+    }
+
+    usedIds.add(id);
+    return { ...todo, id };
+  });
+}
+
 function getInitialTheme() {
   try {
     const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -50,6 +82,8 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const inputRef = useRef(null);
+  const importInputRef = useRef(null);
+  const [importMessage, setImportMessage] = useState("");
 
   useEffect(() => {
     try {
@@ -165,6 +199,53 @@ function App() {
 
   const clearCompleted = () => {
     setTodos(todos.filter((todo) => !todo.completed));
+  };
+
+  const exportTodos = () => {
+    const file = new Blob([JSON.stringify(todos, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "todos.json";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+
+  const importTodos = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const importedTodos = JSON.parse(String(reader.result));
+        if (!isTodoArray(importedTodos)) {
+          throw new Error("Invalid todo data");
+        }
+
+        setTodos((currentTodos) =>
+          makeImportedTodos(importedTodos, currentTodos),
+        );
+        setImportMessage("");
+      } catch {
+        setImportMessage(
+          "That file is not a valid todo list. Your current list was kept.",
+        );
+      }
+    };
+    reader.onerror = () => {
+      setImportMessage(
+        "We could not read that file. Your current list was kept.",
+      );
+    };
+    reader.readAsText(file);
+    event.target.value = "";
   };
 
   const remaining = todos.filter((todo) => !todo.completed).length;
@@ -336,11 +417,13 @@ function App() {
         </p>
       )}
 
-      {todos.length > 0 && (
-        <div className="todo-footer">
-          <p className="remaining">
-            {remaining} of {todos.length} remaining
-          </p>
+      <div className="todo-footer">
+        <div className="todo-footer-summary">
+          {todos.length > 0 && (
+            <p className="remaining">
+              {remaining} of {todos.length} remaining
+            </p>
+          )}
 
           {completed > 0 && (
             <button
@@ -352,6 +435,38 @@ function App() {
             </button>
           )}
         </div>
+
+        <div className="todo-data-actions">
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={importTodos}
+            hidden
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+          <button
+            type="button"
+            onClick={() => importInputRef.current?.click()}
+            className="todo-data-btn"
+          >
+            Import
+          </button>
+          <button
+            type="button"
+            onClick={exportTodos}
+            className="todo-data-btn"
+          >
+            Export
+          </button>
+        </div>
+      </div>
+
+      {importMessage && (
+        <p className="import-status" role="status">
+          {importMessage}
+        </p>
       )}
 
       {todos.length === 0 && (
