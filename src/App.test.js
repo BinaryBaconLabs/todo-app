@@ -269,3 +269,51 @@ test('persists the reordered todos in localStorage', () => {
     'Task C',
   ]);
 });
+
+test('imports todos from a JSON file', async () => {
+  const { container } = render(<App />);
+  const file = new File(
+    [
+      JSON.stringify([
+        { id: 1, text: 'buy milk', completed: false },
+        { id: 2, text: 'walk the dog', completed: true },
+      ]),
+    ],
+    'todos.json',
+    { type: 'application/json' },
+  );
+
+  fireEvent.change(container.querySelector('input[type="file"]'), {
+    target: { files: [file] },
+  });
+
+  // FileReader is async, so wait for the first imported todo to show up.
+  expect(await screen.findByText('buy milk')).toBeInTheDocument();
+  expect(screen.getByText('walk the dog')).toBeInTheDocument();
+  expect(screen.getByText('1 of 2 remaining')).toBeInTheDocument();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+});
+
+test('keeps the current list when the imported file is not a todo list', async () => {
+  const { container } = render(<App />);
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+  fireEvent.change(input, { target: { value: 'water the plants' } });
+  fireEvent.submit(input.closest('form'));
+
+  const file = new File(
+    [JSON.stringify({ text: 'not a list', completed: false })],
+    'notes.json',
+    { type: 'application/json' },
+  );
+
+  fireEvent.change(container.querySelector('input[type="file"]'), {
+    target: { files: [file] },
+  });
+
+  expect(
+    await screen.findByText(/not a valid todo list/i),
+  ).toBeInTheDocument();
+  expect(screen.getByText('water the plants')).toBeInTheDocument();
+  expect(screen.queryByText('not a list')).not.toBeInTheDocument();
+  expect(screen.getByText('1 of 1 remaining')).toBeInTheDocument();
+});
