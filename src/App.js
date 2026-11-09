@@ -85,10 +85,9 @@ function App() {
   const inputRef = useRef(null);
   const importInputRef = useRef(null);
   const [importMessage, setImportMessage] = useState("");
-  const [lastDeleted  , setlastdeleted] = useState(null)
+  const [lastDeleted, setlastdeleted] = useState(null);
 
-
-  const timeoutId = useRef(null)
+  const timeoutId = useRef(null);
 
   useEffect(() => {
     try {
@@ -156,36 +155,33 @@ function App() {
   };
 
   const undoDelete = () => {
+    const prevoiusarray = [...todos];
 
-    const prevoiusarray = [...todos]
-   
-    const {todoText , index} = lastDeleted
+    const { todo, index } = lastDeleted;
 
-     prevoiusarray.splice(index , 0 , todoText)
+    prevoiusarray.splice(index, 0, todo);
 
-    setTodos(prevoiusarray)
-    setlastdeleted(null)
-
-  }
+    setTodos(prevoiusarray);
+    setlastdeleted(null);
+    clearTimeout(timeoutId.current);
+  };
 
   const deleteTodo = (id) => {
-    
     if (timeoutId.current) {
-      clearTimeout(timeoutId.current)  
+      clearTimeout(timeoutId.current);
     }
 
-    const index = todos.findIndex((todo) => todo.id === id)
-   
-    const todoText = todos[index]
+    const index = todos.findIndex((todo) => todo.id === id);
 
-    setlastdeleted({index , todoText})
+    const todo = todos[index];
+
+    setlastdeleted({ index, todo });
 
     timeoutId.current = setTimeout(() => {
-      setlastdeleted(null)
+      setlastdeleted(null);
     }, 5000);
 
     setTodos(todos.filter((todo) => todo.id !== id));
-    
   };
   const moveTodo = (id, direction) => {
     setTodos((currentTodos) => {
@@ -360,11 +356,11 @@ function App() {
       </div>
 
       {lastDeleted && (
-  <div className="undo-bar" role="status">
-    <span>Deleted "{lastDeleted.todoText.text}"</span>
-    <button onClick={undoDelete}>Undo</button>
-  </div>
-)}
+        <div className="undo-bar" role="status">
+          <span>Deleted "{lastDeleted.todo.text}"</span>
+          <button onClick={undoDelete}>Undo</button>
+        </div>
+      )}
 
       <ul className="todo-list">
         {filteredTodos.map((todo) => (
@@ -509,11 +505,7 @@ function App() {
           >
             Import
           </button>
-          <button
-            type="button"
-            onClick={exportTodos}
-            className="todo-data-btn"
-          >
+          <button type="button" onClick={exportTodos} className="todo-data-btn">
             Export
           </button>
         </div>

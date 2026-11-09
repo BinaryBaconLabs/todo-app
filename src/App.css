@@ -10,7 +10,7 @@
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
   --page-background: #121820;
   --surface: #1d2733;
@@ -25,7 +25,9 @@
 body {
   background: var(--page-background);
   color: var(--text);
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .app {
@@ -36,7 +38,9 @@ body {
   border-radius: 8px;
   padding: 24px;
   box-shadow: var(--shadow);
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .app-header {
@@ -266,7 +270,9 @@ button:focus-visible {
   font-size: 18px;
   font-weight: 600;
   line-height: 1;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .move-btn:hover:not(:disabled) {
@@ -391,7 +397,6 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   body,
   .app {
     transition: none;
