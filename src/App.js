@@ -85,6 +85,10 @@ function App() {
   const inputRef = useRef(null);
   const importInputRef = useRef(null);
   const [importMessage, setImportMessage] = useState("");
+  const [lastDeleted  , setlastdeleted] = useState(null)
+
+
+  const timeoutId = useRef(null)
 
   useEffect(() => {
     try {
@@ -151,8 +155,37 @@ function App() {
     );
   };
 
+  const undoDelete = () => {
+
+    const prevoiusarray = [...todos]
+   
+    const {todoText , index} = lastDeleted
+
+     prevoiusarray.splice(index , 0 , todoText)
+
+    setTodos(prevoiusarray)
+    setlastdeleted(null)
+
+  }
+
   const deleteTodo = (id) => {
+    
+    if (timeoutId.current) {
+      clearTimeout(timeoutId.current)  
+    }
+
+    const index = todos.findIndex((todo) => todo.id === id)
+   
+    const todoText = todos[index]
+
+    setlastdeleted({index , todoText})
+
+    timeoutId.current = setTimeout(() => {
+      setlastdeleted(null)
+    }, 5000);
+
     setTodos(todos.filter((todo) => todo.id !== id));
+    
   };
   const moveTodo = (id, direction) => {
     setTodos((currentTodos) => {
@@ -325,6 +358,13 @@ function App() {
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
+
+      {lastDeleted && (
+  <div className="undo-bar" role="status">
+    <span>Deleted "{lastDeleted.todoText.text}"</span>
+    <button onClick={undoDelete}>Undo</button>
+  </div>
+)}
 
       <ul className="todo-list">
         {filteredTodos.map((todo) => (
