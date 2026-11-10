@@ -231,6 +231,18 @@ function App() {
     setTodos(todos.filter((todo) => !todo.completed));
   };
 
+  const toggleAll = () => {
+    const allCompleted = filteredTodos.every((todo) => todo.completed);
+    const visibleIds = new Set(filteredTodos.map((todo) => todo.id));
+    setTodos((currentTodos) =>
+      currentTodos.map((todo) =>
+        visibleIds.has(todo.id)
+          ? { ...todo, completed: !allCompleted }
+          : todo,
+      ),
+    );
+  };
+
   const exportTodos = () => {
     const file = new Blob([JSON.stringify(todos, null, 2)], {
       type: "application/json",
@@ -475,6 +487,18 @@ function App() {
             <p className="remaining">
               {remaining} of {todos.length} remaining
             </p>
+          )}
+
+          {filteredTodos.length > 0 && (
+            <button
+              type="button"
+              onClick={toggleAll}
+              className="toggle-all-btn"
+            >
+              {filteredTodos.every((todo) => todo.completed)
+                ? "Mark all active"
+                : "Complete all"}
+            </button>
           )}
 
           {completed > 0 && (

@@ -355,3 +355,32 @@ test('shows a search-specific empty state when no todos match', () => {
   expect(screen.getByRole('status')).toHaveTextContent('No tasks match your search.');
   expect(screen.getByText('1 of 1 remaining')).toBeInTheDocument();
 });
+
+
+test('completes all visible todos at once', () => {
+  window.localStorage.clear();
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Complete all' }));
+
+  const todos = screen.getAllByRole('listitem');
+  expect(todos).toHaveLength(2);
+  todos.forEach((todo) => {
+    expect(todo).toHaveClass('completed');
+  });
+
+  expect(screen.getByText('0 of 2 remaining')).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: 'Mark all active' }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: /clear completed/i }),
+  ).toBeInTheDocument();
+});

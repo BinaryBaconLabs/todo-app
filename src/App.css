@@ -328,6 +328,7 @@ button:focus-visible {
   margin: 0;
 }
 
+.toggle-all-btn,
 .clear-btn {
   background: none;
   border: none;
@@ -337,6 +338,7 @@ button:focus-visible {
   padding: 0;
 }
 
+.toggle-all-btn:hover,
 .clear-btn:hover {
   text-decoration: underline;
 }
