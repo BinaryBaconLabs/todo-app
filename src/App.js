@@ -51,6 +51,29 @@ function getInitialTheme() {
     : "light";
 }
 
+// Parse filter and search query from the URL hash.
+function getHashState() {
+  const hash = window.location.hash || "";
+  const clean = hash.replace(/^#\/?/, "");
+  const [filterPart, queryPart] = clean.split("?");
+  const filter =
+    filterPart === "active" || filterPart === "completed" ? filterPart : "all";
+
+  let query = "";
+  if (queryPart) {
+    const match = queryPart.match(/(?:^|&)q=([^&]*)/);
+    if (match) {
+      try {
+        query = decodeURIComponent(match[1].replace(/\+/g, " "));
+      } catch {
+        query = match[1];
+      }
+    }
+  }
+
+  return { filter, query };
+}
+
 function App() {
   const [todos, setTodos] = useState(() => {
     try {
@@ -78,8 +101,8 @@ function App() {
 
   const [input, setInput] = useState("");
   const [theme, setTheme] = useState(getInitialTheme);
-  const [filter, setFilter] = useState("all");
-  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState(() => getHashState().filter);
+  const [query, setQuery] = useState(() => getHashState().query);
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const inputRef = useRef(null);
@@ -120,6 +143,37 @@ function App() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Sync state to URL hash.
+  useEffect(() => {
+    if (filter === "all" && !query) {
+      if (window.location.hash) {
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      }
+    } else {
+      const queryString = query ? `?q=${encodeURIComponent(query)}` : "";
+      const targetHash = `#/${filter}${queryString}`;
+      if (window.location.hash !== targetHash) {
+        window.history.replaceState(null, "", targetHash);
+      }
+    }
+  }, [filter, query]);
+
+  // Keep state in sync with browser navigation and pasted links.
+  useEffect(() => {
+    const handleHashChange = () => {
+      const { filter: nextFilter, query: nextQuery } = getHashState();
+      setFilter(nextFilter);
+      setQuery(nextQuery);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const handleInputKeyDown = (e) => {

@@ -1,6 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
+afterEach(() => {
+  window.location.hash = '';
+  window.history.replaceState(null, '', '/');
+});
+
 test('edits a todo on double-click: Enter saves, Escape cancels', () => {
   render(<App />);
   const input = screen.getByPlaceholderText(/Add a new task/i);
@@ -383,4 +388,18 @@ test('completes all visible todos at once', () => {
   expect(
     screen.getByRole('button', { name: /clear completed/i }),
   ).toBeInTheDocument();
+});
+
+test('initializes the Completed filter and search text from the URL hash', () => {
+  window.location.hash = '#/completed?q=milk';
+  render(<App />);
+
+  expect(screen.getByRole('button', { name: 'Completed' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  expect(screen.getByRole('searchbox', { name: 'Search tasks' })).toHaveValue(
+    'milk',
+  );
+  window.location.hash = '';
 });
