@@ -22,7 +22,8 @@ A simple React-based Todo application.
 - Todos are kept in local storage, so they survive a reload
 - Export the list as a JSON file and import it again later (a file that is not a todo list is ignored)
 - Dark mode toggle (follows the system setting on first visit)
-- Keyboard shortcuts: `n` focuses the input, `Escape` clears it, `x` completes the focused task
+- Keyboard shortcuts: `n` focuses the input, `/` focuses the search box, `Escape` clears the search when focused, `x` completes the focused task
+
 - Clean and responsive UI
 
 ## Getting Started

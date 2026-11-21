@@ -440,3 +440,32 @@ test('hides filter counts when the todo list is empty', () => {
     expect(tab.querySelector('.filter-count')).toBeNull();
   });
 });
+
+test('focuses the search box when / is pressed', () => {
+  render(<App />);
+
+  const searchInput = screen.getByRole('searchbox', {
+    name: 'Search tasks',
+  });
+
+  fireEvent.keyDown(document, { key: '/' });
+
+  expect(searchInput).toHaveFocus();
+});
+
+test('clears search and keeps focus when Escape is pressed', () => {
+  render(<App />);
+
+  const searchInput = screen.getByRole('searchbox', {
+    name: 'Search tasks',
+  });
+
+  fireEvent.change(searchInput, {
+    target: { value: 'hello' },
+  });
+
+  fireEvent.keyDown(searchInput, { key: 'Escape' });
+
+  expect(searchInput).toHaveValue('');
+  expect(searchInput).toHaveFocus();
+});

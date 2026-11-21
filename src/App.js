@@ -106,6 +106,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const inputRef = useRef(null);
+  const searchref = useRef(null);
   const importInputRef = useRef(null);
   const [importMessage, setImportMessage] = useState("");
   const [lastDeleted, setlastdeleted] = useState(null);
@@ -134,6 +135,10 @@ function App() {
     const handleKeyDown = (e) => {
       if (e.target.tagName === "INPUT") return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      if (e.key === "/") {
+        e.preventDefault();
+        searchref.current.focus();
+      }
 
       if (e.key === "n") {
         e.preventDefault();
@@ -418,11 +423,18 @@ function App() {
         ))}
         <input
           type="search"
+          ref={searchref}
           className="search-input"
           placeholder="Search tasks..."
           aria-label="Search tasks"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setQuery("");
+              searchref.current.focus();
+            }
+          }}
         />
       </div>
 
