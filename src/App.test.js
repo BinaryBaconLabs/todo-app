@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
 afterEach(() => {
@@ -338,9 +338,11 @@ test('searches todos by text without changing the overall counts', () => {
   const searchInput = screen.getByRole('searchbox', { name: 'Search tasks' });
   fireEvent.change(searchInput, { target: { value: 'milk' } });
 
-  expect(screen.getByText('buy milk')).toBeInTheDocument();
+  // the match is wrapped in <mark>, so the todo text is no longer a single text node
+  const items = screen.getAllByRole('listitem');
+  expect(items).toHaveLength(1);
+  expect(items[0]).toHaveTextContent('buy milk');
   expect(screen.queryByText('walk the dog')).not.toBeInTheDocument();
-  expect(screen.getAllByRole('listitem')).toHaveLength(1);
   expect(screen.getByText('2 of 2 remaining')).toBeInTheDocument();
   expect(document.title).toBe('(2) todo-app');
 });
@@ -482,10 +484,65 @@ test('highlights the first case-insensitive search match and preserves the rest 
     target: { value: 'MILK' },
   });
 
-  const todoText = screen.getByText('Buy milk today');
-  const match = todoText.querySelector('mark.match');
+  const match = screen.getByText('milk', { selector: 'mark.match' });
+  const todoText = match.parentElement;
 
   expect(match).toHaveTextContent('milk');
   expect(todoText).toHaveTextContent('Buy milk today');
   expect(todoText.textContent).toBe('Buy milk today');
+});
+
+test('puts a deleted todo back in its old position with Undo', () => {
+  render(<App />);
+
+  const input = screen.getByPlaceholderText(/Add a new task/i);
+
+  ['Task A', 'Task B', 'Task C'].forEach((task) => {
+    fireEvent.change(input, { target: { value: task } });
+    fireEvent.submit(input.closest('form'));
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Delete Task B' }));
+
+  expect(screen.queryByText('Task B')).not.toBeInTheDocument();
+  expect(screen.getByText('Deleted "Task B"')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+
+  expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeInTheDocument();
+
+  const savedTodos = JSON.parse(window.localStorage.getItem('todos'));
+
+  expect(savedTodos.map(todo => todo.text)).toEqual([
+    'Task A',
+    'Task B',
+    'Task C',
+  ]);
+});
+
+test('drops the undo bar five seconds after a delete', () => {
+  jest.useFakeTimers();
+
+  try {
+    render(<App />);
+
+    const input = screen.getByPlaceholderText(/Add a new task/i);
+    fireEvent.change(input, { target: { value: 'water the plants' } });
+    fireEvent.submit(input.closest('form'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete water the plants' }));
+
+    act(() => {
+      jest.advanceTimersByTime(4999);
+    });
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeInTheDocument();
+    expect(screen.queryByText('water the plants')).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
 });
